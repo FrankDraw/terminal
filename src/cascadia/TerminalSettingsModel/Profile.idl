@@ -43,6 +43,8 @@ namespace Microsoft.Terminal.Settings.Model
         Profile();
         Profile(Guid guid);
 
+        Profile Copy();
+
         void CreateUnfocusedAppearance();
         void DeleteUnfocusedAppearance();
 
@@ -50,17 +52,12 @@ namespace Microsoft.Terminal.Settings.Model
         Boolean Deleted { get; };
         OriginTag Origin { get; };
 
+        INHERITABLE_PROFILE_SETTING(Guid, Guid);
         INHERITABLE_PROFILE_SETTING(String, Name);
-
-        Boolean HasGuid();
-        Guid Guid;
-
         INHERITABLE_PROFILE_SETTING(String, Source);
-
-        Boolean HasConnectionType();
-        Guid ConnectionType;
-
         INHERITABLE_PROFILE_SETTING(Boolean, Hidden);
+        INHERITABLE_PROFILE_SETTING(Guid, ConnectionType);
+
         INHERITABLE_PROFILE_SETTING(String, Icon);
         INHERITABLE_PROFILE_SETTING(CloseOnExitMode, CloseOnExit);
         INHERITABLE_PROFILE_SETTING(String, TabTitle);

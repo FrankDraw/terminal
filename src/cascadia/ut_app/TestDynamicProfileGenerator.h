@@ -21,24 +21,25 @@ namespace TerminalAppUnitTests
 };
 
 class TerminalAppUnitTests::TestDynamicProfileGenerator final :
-    public Microsoft::Terminal::Settings::Model::IDynamicProfileGenerator
+    public winrt::Microsoft::Terminal::Settings::Model::IDynamicProfileGenerator
 {
 public:
-    TestDynamicProfileGenerator(std::wstring_view ns) :
-        _namespace{ ns } {};
+    TestDynamicProfileGenerator(const std::wstring_view& ns, std::function<void(std::vector<winrt::Microsoft::Terminal::Settings::Model::Profile>&)> pfnGenerate) :
+        _namespace{ ns },
+        _pfnGenerate{ std::move(_pfnGenerate) },
+    {
+    }
 
     std::wstring_view GetNamespace() override { return _namespace; };
 
-    std::vector<winrt::Microsoft::Terminal::Settings::Model::Profile> GenerateProfiles() override
+    void GenerateProfiles(std::vector<winrt::Microsoft::Terminal::Settings::Model::implementation::Profile>& profiles) override
     {
         if (pfnGenerate)
         {
-            return pfnGenerate();
+            return pfnGenerate(profiles);
         }
-        return std::vector<winrt::Microsoft::Terminal::Settings::Model::Profile>{};
     }
 
     std::wstring _namespace;
-
-    std::function<std::vector<winrt::Microsoft::Terminal::Settings::Model::Profile>()> pfnGenerate{ nullptr };
+    std::function<void(std::vector<winrt::Microsoft::Terminal::Settings::Model::Profile>&)> _pfnGenerate;
 };

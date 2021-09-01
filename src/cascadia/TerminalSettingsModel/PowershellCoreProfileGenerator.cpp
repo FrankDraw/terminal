@@ -300,34 +300,33 @@ std::wstring_view PowershellCoreProfileGenerator::GetNamespace()
 // - <none>
 // Return Value:
 // - a vector with the PowerShell Core profile, if available.
-std::vector<Profile> PowershellCoreProfileGenerator::GenerateProfiles()
+void PowershellCoreProfileGenerator::GenerateProfiles(std::vector<winrt::com_ptr<implementation::Profile>>& profiles)
 {
-    std::vector<Profile> profiles;
+    const auto psInstances = _collectPowerShellInstances();
+    bool first = true;
 
-    auto psInstances = _collectPowerShellInstances();
     for (const auto& psI : psInstances)
     {
         const auto name = psI.Name();
-        auto profile{ CreateDefaultProfile(name) };
-        profile.Commandline(psI.executablePath.wstring());
-        profile.StartingDirectory(DEFAULT_STARTING_DIRECTORY);
-        profile.DefaultAppearance().ColorSchemeName(L"Campbell");
+        auto profile{ CreateDefaultProfile(PowershellCoreGeneratorNamespace, name) };
+        profile->Commandline(winrt::hstring{ psI.executablePath.native() });
+        profile->StartingDirectory(winrt::hstring{ DEFAULT_STARTING_DIRECTORY });
+        profile->DefaultAppearance().ColorSchemeName(L"Campbell");
+        profile->Icon(winrt::hstring{ WI_IsFlagSet(psI.flags, PowerShellFlags::Preview) ? POWERSHELL_PREVIEW_ICON : POWERSHELL_ICON });
 
-        profile.Icon(WI_IsFlagSet(psI.flags, PowerShellFlags::Preview) ? POWERSHELL_PREVIEW_ICON : POWERSHELL_ICON);
+        if (first)
+        {
+            // Give the first ("algorithmically best") profile the official, and original, "PowerShell Core" GUID.
+            // This will turn the anchored default profile into "PowerShell Core Latest for Native Architecture through Store"
+            // (or the closest approximation thereof). It may choose a preview instance as the "best" if it is a higher version.
+            profile->Guid(PowershellCoreGuid);
+            profile->Name(winrt::hstring{ POWERSHELL_PREFERRED_PROFILE_NAME });
+
+            first = false;
+        }
+
         profiles.emplace_back(std::move(profile));
     }
-
-    if (profiles.size() > 0)
-    {
-        // Give the first ("algorithmically best") profile the official, and original, "PowerShell Core" GUID.
-        // This will turn the anchored default profile into "PowerShell Core Latest for Native Architecture through Store"
-        // (or the closest approximation thereof). It may choose a preview instance as the "best" if it is a higher version.
-        auto firstProfile = profiles.begin();
-        firstProfile->Guid(PowershellCoreGuid);
-        firstProfile->Name(POWERSHELL_PREFERRED_PROFILE_NAME);
-    }
-
-    return profiles;
 }
 
 // Function Description:

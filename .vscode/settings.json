@@ -94,12 +94,15 @@
         "xlocinfo": "cpp",
         "xmemory": "cpp",
         "xstddef": "cpp",
-        "xtr1common": "cpp"
+        "xtr1common": "cpp",
+        "coroutine": "cpp",
+        "format": "cpp",
+        "forward_list": "cpp",
+        "latch": "cpp"
     },
     "files.exclude": {
         "**/bin/**": true,
         "**/obj/**": true,
-        "**/packages/**": true,
-        "**/Generated Files/**": true
+        "**/packages/**": true
     }
 }

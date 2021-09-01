@@ -753,21 +753,21 @@ namespace winrt::TerminalApp::implementation
             auto newSettings = _isUwp ? CascadiaSettings::LoadUniversal() : CascadiaSettings::LoadAll();
             _settings = newSettings;
 
-            if (_settings.GetLoadingError())
+            if (const auto err = _settings.GetLoadingError())
             {
-                _settingsLoadExceptionText = _GetErrorText(_settings.GetLoadingError().Value());
+                _settingsLoadExceptionText = _GetErrorText(err.Value());
                 return E_INVALIDARG;
             }
-            else if (!_settings.GetSerializationErrorMessage().empty())
+            else if (const auto msg = _settings.GetSerializationErrorMessage(); !msg.empty())
             {
-                _settingsLoadExceptionText = _settings.GetSerializationErrorMessage();
+                _settingsLoadExceptionText = msg;
                 return E_INVALIDARG;
             }
 
-            _warnings.clear();
-            for (uint32_t i = 0; i < _settings.Warnings().Size(); i++)
             {
-                _warnings.push_back(_settings.Warnings().GetAt(i));
+                const auto warnings = _settings.Warnings();
+                _warnings.resize(warnings.Size());
+                warnings.GetMany(0, _warnings);
             }
 
             _hasSettingsStartupActions = false;
